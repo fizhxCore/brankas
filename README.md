@@ -30,8 +30,10 @@ disimpan di repo), jadi repo tetap ringan — cuma `lib/` dan `pubspec.yaml`.
   yang lagi tampil diekspor jadi satu file `.txt`, dibagikan lewat share
   sheet (simpan, kirim ke WA, dll).
 - **Backup & Restore**: menu titik tiga → export seluruh data sebagai file
-  `.json` (buat disimpan di Drive dsb), atau restore dari file itu balik.
-  Restore akan **menimpa** data yang ada saat ini.
+  `.json` (buat disimpan di Drive dsb). Buat restore: buka file `.json` itu
+  pakai app Files/text editor apa aja, copy isinya, tempel di kolom yang
+  disediakan, lalu tekan restore. Restore akan **menimpa** data yang ada
+  saat ini.
 
 ## Soal keamanan
 
