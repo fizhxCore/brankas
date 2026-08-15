@@ -28,6 +28,18 @@ jobs:
           rm -rf app/lib
           cp -r source/lib app/lib
 
+      - name: Bump compileSdk/targetSdk (file_picker requires 36+)
+        working-directory: app
+        run: |
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
+            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle.kts
+          fi
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/' android/app/build.gradle
+            sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 36/' android/app/build.gradle
+          fi
+
       - name: Get dependencies
         working-directory: app
         run: flutter pub get
