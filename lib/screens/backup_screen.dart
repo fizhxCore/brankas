@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import '../services/vault_storage.dart';
 import '../services/export_service.dart';
 import '../theme/app_theme.dart';
@@ -15,6 +13,7 @@ class BackupScreen extends StatefulWidget {
 class _BackupScreenState extends State<BackupScreen> {
   final _storage = VaultStorage();
   final _export = ExportService();
+  final _restoreController = TextEditingController();
   bool _busy = false;
   String? _message;
 
@@ -29,20 +28,16 @@ class _BackupScreenState extends State<BackupScreen> {
   }
 
   Future<void> _restore() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    if (result == null || result.files.single.path == null) return;
+    final text = _restoreController.text.trim();
+    if (text.isEmpty) return;
 
-    if (!mounted) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.panel,
         title: const Text('Timpa data sekarang?', style: TextStyle(color: Colors.white)),
         content: const Text(
-          'Data yang ada saat ini akan digantikan dengan isi file backup ini.',
+          'Data yang ada saat ini akan digantikan dengan isi backup yang ditempel.',
           style: TextStyle(color: AppTheme.muted),
         ),
         actions: [
@@ -61,11 +56,13 @@ class _BackupScreenState extends State<BackupScreen> {
       _message = null;
     });
     try {
-      final raw = await File(result.files.single.path!).readAsString();
-      await _storage.restoreFromJson(raw);
-      if (mounted) setState(() => _message = 'Data berhasil dipulihkan');
+      await _storage.restoreFromJson(text);
+      if (mounted) {
+        setState(() => _message = 'Data berhasil dipulihkan');
+        _restoreController.clear();
+      }
     } catch (_) {
-      if (mounted) setState(() => _message = 'File backup tidak valid');
+      if (mounted) setState(() => _message = 'Teks backup tidak valid');
     }
     if (mounted) setState(() => _busy = false);
   }
@@ -77,8 +74,7 @@ class _BackupScreenState extends State<BackupScreen> {
       appBar: AppBar(backgroundColor: AppTheme.bg, elevation: 0, title: const Text('Backup & Restore')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
             if (_message != null) ...[
               Text(_message!, style: const TextStyle(color: AppTheme.accent)),
@@ -99,11 +95,23 @@ class _BackupScreenState extends State<BackupScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
+            const SizedBox(height: 24),
+            const Text(
+              'Untuk restore: buka file backup .json (misal lewat app Files), salin semua isinya, lalu tempel di bawah ini.',
+              style: TextStyle(color: AppTheme.muted, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _restoreController,
+              maxLines: 6,
+              style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 12),
+              decoration: AppTheme.inputDecoration('Tempel isi JSON backup di sini'),
+            ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _busy ? null : _restore,
               icon: const Icon(Icons.download_outlined),
-              label: const Text('Restore dari file backup'),
+              label: const Text('Restore dari teks'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 side: const BorderSide(color: AppTheme.border),
