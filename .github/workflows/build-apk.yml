@@ -31,13 +31,19 @@ jobs:
       - name: Bump compileSdk/targetSdk (file_picker requires 36+)
         working-directory: app
         run: |
-          if [ -f android/app/build.gradle.kts ]; then
-            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
-            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle.kts
+          KTS=android/app/build.gradle.kts
+          GROOVY=android/app/build.gradle
+          if [ -f "$KTS" ]; then
+            sed -i -E 's/^([[:space:]]*)compileSdk[[:space:]]*=.*/\1compileSdk = 36/' "$KTS"
+            sed -i -E 's/^([[:space:]]*)targetSdk[[:space:]]*=.*/\1targetSdk = 36/' "$KTS"
+            echo "--- $KTS after patch ---"
+            grep -n "compileSdk\|targetSdk" "$KTS"
           fi
-          if [ -f android/app/build.gradle ]; then
-            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/' android/app/build.gradle
-            sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 36/' android/app/build.gradle
+          if [ -f "$GROOVY" ]; then
+            sed -i -E 's/^([[:space:]]*)compileSdkVersion[[:space:]]+.*/\1compileSdkVersion 36/' "$GROOVY"
+            sed -i -E 's/^([[:space:]]*)targetSdkVersion[[:space:]]+.*/\1targetSdkVersion 36/' "$GROOVY"
+            echo "--- $GROOVY after patch ---"
+            grep -n "compileSdkVersion\|targetSdkVersion" "$GROOVY"
           fi
 
       - name: Get dependencies
